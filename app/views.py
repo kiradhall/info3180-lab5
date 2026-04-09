@@ -10,10 +10,10 @@ from flask_wtf.csrf import generate_csrf
 from app import app, db
 from app.forms import MovieForm
 from app.models import Movie
-from flask import current_app, jsonify, request
+from flask import current_app, jsonify, request, send_from_directory, send_file, render_template
 from uuid import uuid4
 from werkzeug.utils import secure_filename
-from flask import render_template, request, jsonify, send_file
+
 import os
 
 
@@ -62,6 +62,27 @@ def movies():
     return jsonify({
         "errors": form_errors(form)
     }), 400
+
+@app.route('/api/v1/movies', methods=['GET'])
+def get_movies():
+    movies = Movie.query.all()
+
+    movies_list = []
+    for movie in movies:
+        movies_list.append({
+            "id": movie.id,
+            "title": movie.title,
+            "description": movie.description,
+            "poster": f"/api/v1/posters/{movie.poster}"
+        })
+
+    return jsonify({
+        "movies": movies_list
+    })
+    
+@app.route('/api/v1/posters/<filename>', methods=['GET'])
+def get_poster(filename):
+    return send_from_directory(current_app.config["UPLOAD_FOLDER"], filename)
 
 @app.route('/api/v1/csrf-token', methods=['GET'])
 def get_csrf():
