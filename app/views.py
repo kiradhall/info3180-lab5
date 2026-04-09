@@ -5,6 +5,8 @@ Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file creates your application.
 """
 
+from flask_wtf.csrf import generate_csrf
+
 from app import app, db
 from app.forms import MovieForm
 from app.models import Movie
@@ -60,7 +62,10 @@ def movies():
     return jsonify({
         "errors": form_errors(form)
     }), 400
-    
+
+@app.route('/api/v1/csrf-token', methods=['GET'])
+def get_csrf():
+    return jsonify({'csrf_token': generate_csrf()}) 
 ###
 # The functions below should be applicable to all Flask apps.
 ###
